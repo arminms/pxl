@@ -1,0 +1,11 @@
+{
+  "dependencies": [
+    "pthreads"
+  ],
+  "features": {
+    "tests": {
+      "description": "Dependencies needed for the unit tests",
+      "dependencies": [ "catch2" ]
+    }
+  }
+}
