@@ -1,0 +1,58 @@
+name: Build and Test (Linux/macOS/Windows)
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - uses: actions/github-script@v9
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+    - name: Install dependencies via vcpkg
+      run: vcpkg install --binarysource="clear;x-gha,readwrite"
+
+    - name: Install libomp on macOS
+      run: brew install libomp
+      if: matrix.os == 'macos-latest'
+
+    - name: Set up MSVC
+      uses: arminms/msvc-dev-cmd@v1
+      if: matrix.os == 'windows-latest'
+
+    - name: Configure with CMake (Linux/Windows)
+      run: |
+        cmake -S ${{github.workspace}} --preset vcpkg -B build
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest'
+
+    - name: Configure with CMake (macOS)
+      run: |
+        export OpenMP_ROOT=$(brew --prefix libomp)
+        cmake -S ${{github.workspace}} --preset vcpkg -B build \
+        -DOpenMP_ROOT=$OpenMP_ROOT \
+        -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$OpenMP_ROOT/include" \
+        -DOpenMP_CXX_LIB_NAMES="omp" \
+        -DOpenMP_omp_LIBRARY=$OpenMP_ROOT/lib/libomp.dylib
+      if: matrix.os == 'macos-latest'
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      env:
+        CTEST_PARALLEL_LEVEL: 1
+      run: ctest --output-on-failure
