@@ -270,8 +270,8 @@ public:
     ///
     /// @brief Returns the maximum possible number of channels
     /// @return The maximum number of channels, i.e. `C`.
-    constexpr size_type max_size() const noexcept
-    {   return channels_.max_size();
+    static constexpr size_type max_size() noexcept
+    {   return C;
     }
 
 // -- operations ---------------------------------------------------------------
