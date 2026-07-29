@@ -15,6 +15,7 @@ struct generic_color
 {
 public:
     using value_type = T;
+    using channel_type = T;
     using size_type = typename std::array<T,C>::size_type;
     using difference_type = typename std::array<T,C>::difference_type;
     using reference = typename std::array<T,C>::reference;
@@ -38,7 +39,7 @@ public:
     :   channels_(a)
     {}
     ///
-    /// @brief iterator constructor
+    /// @brief Iterator constructor
     /// @details Initializes the color with the elements in the range
     ///          [first, last).
     /// @param first The first element in the range.
@@ -54,12 +55,12 @@ public:
     generic_color(const generic_color& other)
     :   channels_(other.channels_)
     {}
-    /// @brief move constructor
+    /// @brief Move constructor
     /// @param other The color to move.
     generic_color(generic_color&& other)
     :   channels_(std::move(other.channels_))
     {}
-    /// @brief initializer list constructor
+    /// @brief Initializer list constructor
     /// @param init The initializer list.
     generic_color(std::initializer_list<value_type> init)
     // :   channels_(init)
@@ -68,7 +69,7 @@ public:
         for (std::size_t i = 0; i < C && first != last; ++i)
             channels_[i] = *first++;
     }
-    /// @brief converting constructor from uint32_t
+    /// @brief Converting constructor from uint32_t
     /// @param rgba The 32-bit RGBA value.
     constexpr generic_color(uint32_t rgba)
     :   channels_
@@ -78,6 +79,28 @@ public:
         )
     )
     {}
+
+// -- copy assignment operators ------------------------------------------------
+    ///
+    /// @brief Copy assignment operator
+    /// @param other The color to copy.
+    generic_color& operator= (const generic_color& other)
+    {   channels_ = other.channels_;
+        return *this;
+    }
+    /// @brief Move assignment operator
+    /// @param other The color to move.
+    generic_color& operator= (generic_color&& other)
+    {   channels_ = std::move(other.channels_);
+        return *this;
+    }
+    /// @brief Initializer list assignment operator
+    /// @param init The initializer list.
+    generic_color& operator= (std::initializer_list<value_type> init)
+    {   for (std::size_t i = 0; i < C && i < init.size(); ++i)
+            channels_[i] = *(init.begin() + i);
+        return *this;
+    }
 
 // -- element access -------------------------------------------------------------
     ///
@@ -108,7 +131,7 @@ public:
     /// @brief Access specified channel
     /// @param pos Position of the channel to return.
     /// @return Const reference to the requested channel. No bounds checking
-    ///     is performed.
+    /// is performed.
     constexpr const_reference operator[](size_type pos) const
     {   return channels_[pos];
     }
