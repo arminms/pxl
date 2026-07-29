@@ -80,6 +80,60 @@ TEST_CASE
     REQUIRE(c[3] == 4);
 }
 
+// -- assignment operators -----------------------------------------------------
+
+TEST_CASE
+(   "generic_color copy assignment operator duplicates the channels"
+,   "[color][assignment]"
+)
+{   generic_color<int, 3> a{1, 2, 3};
+    generic_color<int, 3> b{4, 5, 6};
+
+    b = a;
+    REQUIRE(b[0] == 1);
+    REQUIRE(b[1] == 2);
+    REQUIRE(b[2] == 3);
+    // the copy is independent from the original
+    a[0] = 99;
+    REQUIRE(b[0] == 1);
+}
+TEST_CASE
+(   "generic_color move assignment operator transfers the channels"
+,   "[color][assignment]"
+)
+{   generic_color<int, 3> a{1, 2, 3};
+    generic_color<int, 3> b{4, 5, 6};
+
+    b = std::move(a);
+    REQUIRE(b[0] == 1);
+    REQUIRE(b[1] == 2);
+    REQUIRE(b[2] == 3);
+}
+TEST_CASE
+(   "generic_color initializer list assignment operator sets the channels"
+,   "[color][assignment]"
+)
+{   generic_color<int, 4> c{9, 9, 9, 9};
+
+    c = {1, 2, 3, 4};
+    REQUIRE(c[0] == 1);
+    REQUIRE(c[1] == 2);
+    REQUIRE(c[2] == 3);
+    REQUIRE(c[3] == 4);
+}
+TEST_CASE
+(   "generic_color initializer list assignment operator handles short lists"
+,   "[color][assignment]"
+)
+{   generic_color<int, 4> c{9, 9, 9, 9};
+
+    c = {1, 2};
+    REQUIRE(c[0] == 1);
+    REQUIRE(c[1] == 2);
+    REQUIRE(c[2] == 9);
+    REQUIRE(c[3] == 9);
+}
+
 // -- element access -----------------------------------------------------------
 
 TEST_CASE
