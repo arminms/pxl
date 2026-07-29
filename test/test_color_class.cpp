@@ -292,7 +292,7 @@ TEST_CASE
     CHECK(0x2b == c[1]);
     CHECK(0x3c == c[2]);
     CHECK(0x4d == c[3]);
-    CHECK(c == decltype(c)(0x1a2b3c4d_rgba));
+    CHECK(c == 0x1a2b3c4d_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor 16-bits per channel"
@@ -303,7 +303,7 @@ TEST_CASE
     CHECK(0x2b * 0xFF == c[1]);
     CHECK(0x3c * 0xFF == c[2]);
     CHECK(0x4d * 0xFF == c[3]);
-    CHECK(c == decltype(c)(0x1a2b3c4d_rgba));
+    CHECK(c == 0x1a2b3c4d_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor 32-bits per channel"
@@ -314,7 +314,7 @@ TEST_CASE
     CHECK(0x2b * 0xFFFF == c[1]);
     CHECK(0x3c * 0xFFFF == c[2]);
     CHECK(0x4d * 0xFFFF == c[3]);
-    CHECK(c == decltype(c)(0x1a2b3c4d_rgba));
+    CHECK(c == 0x1a2b3c4d_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor 64-bits per channel"
@@ -325,7 +325,7 @@ TEST_CASE
     CHECK(0x2b * 0xFFFFFF == c[1]);
     CHECK(0x3c * 0xFFFFFF == c[2]);
     CHECK(0x4d * 0xFFFFFF == c[3]);
-    CHECK(c == decltype(c)(0x1a2b3c4d_rgba));
+    CHECK(c == 0x1a2b3c4d_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor float per channel"
@@ -336,7 +336,7 @@ TEST_CASE
     REQUIRE_THAT(c[1], Catch::Matchers::WithinRel(0.168627, 0.0001));
     REQUIRE_THAT(c[2], Catch::Matchers::WithinRel(0.235294, 0.0001));
     REQUIRE_THAT(c[3], Catch::Matchers::WithinRel(0.301961, 0.0001));
-    CHECK(c == decltype(c)(0x1a2b3c4d_rgba));
+    CHECK(c == 0x1a2b3c4d_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor double per channel"
@@ -347,5 +347,5 @@ TEST_CASE
     REQUIRE_THAT(c[1], Catch::Matchers::WithinRel(0.168627, 0.0001));
     REQUIRE_THAT(c[2], Catch::Matchers::WithinRel(0.235294, 0.0001));
     REQUIRE_THAT(c[3], Catch::Matchers::WithinRel(0.301961, 0.0001));
-    CHECK(c == decltype(c)(0x1a2b3c4d_rgba));
+    CHECK(c == 0x1a2b3c4d_rgba);
 }

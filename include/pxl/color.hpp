@@ -70,7 +70,7 @@ public:
     }
     /// @brief converting constructor from uint32_t
     /// @param rgba The 32-bit RGBA value.
-    consteval generic_color(uint32_t rgba)
+    constexpr generic_color(uint32_t rgba)
     :   channels_
     (   detail::uint32_to_array<sizeof(T), std::array<T, C>>::convert
         (   rgba

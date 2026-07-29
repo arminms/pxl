@@ -9,7 +9,7 @@
 namespace pxl::detail {
 
 template <std::size_t ... Is>
-consteval auto indexSequenceReverse
+constexpr auto indexSequenceReverse
 (   std::index_sequence<Is...> const &)
 ->  decltype( std::index_sequence<sizeof...(Is)-1U-Is...>{}
 );
@@ -22,13 +22,13 @@ template<std::size_t N>
 struct num { static const constexpr auto value = N; };
 
 template <class F, std::size_t... Is>
-consteval void for_(F func, std::index_sequence<Is...>)
+constexpr void for_(F func, std::index_sequence<Is...>)
 {   using expander = int[];
     (void)expander{0, ((void)func(num<Is>{}), 0)...};
 }
 
 template <std::size_t N, typename F>
-consteval void for_(F func)
+constexpr void for_(F func)
 {   for_(func, makeIndexSequenceReverse<N>());
 }
 
@@ -38,7 +38,7 @@ struct uint32_to_array
 
 template<typename T>
 struct uint32_to_array<1, T> // 8-bits per channels
-{   consteval static T convert(uint32_t rgba, std::false_type)
+{   constexpr static T convert(uint32_t rgba, std::false_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -48,7 +48,7 @@ struct uint32_to_array<1, T> // 8-bits per channels
         );
         return c;
     }
-    consteval static T convert(uint32_t rgba, std::true_type)
+    constexpr static T convert(uint32_t rgba, std::true_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -64,7 +64,7 @@ struct uint32_to_array<1, T> // 8-bits per channels
 
 template<typename T>
 struct uint32_to_array<2, T> // 16-bits per channels
-{   consteval static T convert(uint32_t rgba, std::false_type)
+{   constexpr static T convert(uint32_t rgba, std::false_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -74,7 +74,7 @@ struct uint32_to_array<2, T> // 16-bits per channels
         );
         return c;
     }
-    consteval static T convert(uint32_t rgba, std::true_type)
+    constexpr static T convert(uint32_t rgba, std::true_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -90,7 +90,7 @@ struct uint32_to_array<2, T> // 16-bits per channels
 
 template<typename T>
 struct uint32_to_array<4, T> // 32-bits per channels
-{   consteval static T convert(uint32_t rgba, std::false_type)
+{   constexpr static T convert(uint32_t rgba, std::false_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -100,7 +100,7 @@ struct uint32_to_array<4, T> // 32-bits per channels
         );
         return c;
     }
-    consteval static T convert(uint32_t rgba, std::true_type)
+    constexpr static T convert(uint32_t rgba, std::true_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -116,7 +116,7 @@ struct uint32_to_array<4, T> // 32-bits per channels
 
 template<typename T>
 struct uint32_to_array<8, T> // 64-bits per channels
-{   consteval static T convert(uint32_t rgba, std::false_type)
+{   constexpr static T convert(uint32_t rgba, std::false_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -126,7 +126,7 @@ struct uint32_to_array<8, T> // 64-bits per channels
         );
         return c;
     }
-    consteval static T convert(uint32_t rgba, std::true_type)
+    constexpr static T convert(uint32_t rgba, std::true_type)
     {   T c{0, 0, 0, 0};
         for_<c.size()>
         (   [&] (auto i)
@@ -140,7 +140,7 @@ struct uint32_to_array<8, T> // 64-bits per channels
     }
 };
 
-consteval uint8_t hexchar_to_int(char ch)
+constexpr uint8_t hexchar_to_int(char ch)
 {   if (ch >= '0' && ch <= '9') return ch - '0';
     if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
     if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
@@ -184,13 +184,13 @@ struct hexcolor_to_uint32<D>
 };
 
 template<char... Digits>
-consteval uint32_t operator"" _rgb()
+constexpr uint32_t operator"" _rgb()
 {   static_assert(8 == sizeof...(Digits), "Hex RGB must have 6 digits!");
     return hexcolor_to_uint32<Digits...>::value << 8 | 0xFF;
 }
 
 template<char... Digits>
-consteval uint32_t operator"" _rgba()
+constexpr uint32_t operator"" _rgba()
 {   static_assert(10 == sizeof...(Digits), "Hex RGBA must have 8 digits!");
     return hexcolor_to_uint32<Digits...>::value;
 }
