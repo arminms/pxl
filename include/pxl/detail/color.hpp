@@ -166,7 +166,7 @@ struct hexcolor_to_uint32<D, Digits...>
     );
     static uint32_t const value
     =   pxl::detail::hexchar_to_int(D)
-    *   (1UL << 4 * sizeof...(Digits))
+    *   (1ULL << 4 * sizeof...(Digits))
     +   hexcolor_to_uint32<Digits...>::value;
 };
 
