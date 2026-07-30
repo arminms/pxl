@@ -320,4 +320,10 @@ private:
    std::array<T, C> channels_; // The color channels.
 };
 
+/// @brief A convenience alias for a color with a default type and number of channels.
+/// @tparam T The type of each channel.
+/// @tparam C The number of channels.
+template <typename T = uint8_t, std::size_t C = 4>
+using color = generic_color<T, C>;
+
 } // namespace pxl
