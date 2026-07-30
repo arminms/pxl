@@ -7,6 +7,7 @@
 #include <concepts>
 #include <vector>
 #include <iterator>
+#include <stdexcept>
 
 namespace pxl {
 
