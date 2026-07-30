@@ -3,14 +3,17 @@
 //
 #pragma once
 
+#include <algorithm>
+
 #include <pxl/concepts.hpp>
 #include <pxl/color.hpp>
+#include <pxl/memory.hpp>
 
 namespace pxl {
 
 template <Pixel PixelType, typename Container>
 requires std::contiguous_iterator<typename Container::iterator>
-struct image
+struct generic_image
 {   using value_type = typename Container::value_type;
     using pixel_type = PixelType;
     using channel_type = typename PixelType::channel_type;
@@ -30,7 +33,7 @@ struct image
     /// @brief constructor
     /// @param width image width in pixel
     /// @param height image height in pixel
-    image
+    generic_image
     (   size_type width
     ,   size_type height
     )   noexcept
@@ -39,10 +42,10 @@ struct image
     ,   h_(height)
     {}
     /// @brief fill constructor
-    /// @param width image width in pixel
+    /// @param width generic_image width in pixel
     /// @param height image height in pixel
     /// @param color fill color
-    image
+    generic_image
     (   size_type width
     ,   size_type height
     ,   const generic_color<channel_type, pixel_type::max_size()>& color
@@ -54,14 +57,14 @@ struct image
     }
     /// @brief copy constructor
     /// @param other image to copy from
-    image(const image& other)
+    generic_image(const generic_image& other)
     :   b_(other.b_)
     ,   w_(other.w_)
     ,   h_(other.h_)
     {}
     /// @brief move constructor
     /// @param other image to move from
-    image(image&& other)
+    generic_image(generic_image&& other)
     :   b_(std::move(other.b_))
     ,   w_(other.w_)
     ,   h_(other.h_)
@@ -71,7 +74,7 @@ struct image
     ///
     /// @brief copy assignment operator
     /// @param other The image to copy.
-    image& operator= (const image& other)
+    generic_image& operator= (const generic_image& other)
     {   b_ = other.b_;
         w_ = other.w_;
         h_ = other.h_;
@@ -79,7 +82,7 @@ struct image
     }
     /// @brief move assignment operator
     /// @param other The image to move.
-    image& operator= (image&& other)
+    generic_image& operator= (generic_image&& other)
     {   b_ = std::move(other.b_);
         w_ = other.w_;
         h_ = other.h_;
@@ -123,7 +126,7 @@ struct image
     /// @throws std::out_of_range if `x >= width() || y >= height()`.
     reference at(size_type x, size_type y)
     {   if (x >= w_ || y >= h_)
-            throw std::out_of_range("image::at: index out of range");
+            throw std::out_of_range("generic_image::at: index out of range");
         return b_[y * w_ + x];
     }
     /// @brief Get the pixel at the specified index with bounds checking.
@@ -133,7 +136,7 @@ struct image
     /// @throws std::out_of_range if `x >= width() || y >= height()`.
     const_reference at(size_type x, size_type y) const
     {   if (x >= w_ || y >= h_)
-            throw std::out_of_range("image::at: index out of range");
+            throw std::out_of_range("generic_image::at: index out of range");
         return b_[y * w_ + x];
     }
     /// @brief Get a pointer to the underlying data.
@@ -261,5 +264,23 @@ private:
     size_type  w_; // width
     size_type  h_; // height
 };
+
+/// @brief A convenience alias for an image with a default type and number of
+/// channels.
+/// @tparam T The type of each channel.
+/// @tparam C The number of channels.
+template <typename T, std::size_t C = 4>
+using image
+=   generic_image<generic_color<T, C>
+,   std::vector<generic_color<T, C>>>; 
+/// @brief A convenience alias for an image with a default type and number of
+/// channels, without initialization.
+/// @tparam T The type of each channel.
+/// @tparam C The number of channels.
+template <typename T = uint8_t, std::size_t C = 4>
+using image_no_init
+=   generic_image<generic_color<T, C>
+,   std::vector<generic_color<T, C>
+,   no_init_allocator<generic_color<T, C>>>>; 
 
 } // end pxl namespace
