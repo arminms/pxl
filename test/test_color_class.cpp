@@ -7,10 +7,6 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <algorithm>
-#include <array>
-#include <numeric>
-#include <stdexcept>
-#include <utility>
 
 using pxl::generic_color;
 
