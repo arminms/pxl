@@ -99,17 +99,19 @@ struct generic_image
 
 // -- element access -----------------------------------------------------------
     ///
-    /// @brief Get the pixel at the specified index.
-    /// @param idx The index of the pixel to return.
-    /// @return Reference to the pixel at the specified index.
-    reference operator[] (size_type idx) noexcept
-    {   return b_[idx];
+    /// @brief Get a view of the pixel row at the specified index, allowing
+    /// `image[row][col]` access to a single pixel.
+    /// @param row The index of the row to return.
+    /// @return A view of the pixel row at the specified index.
+    generic_image_view<PixelType> operator[] (size_type row) noexcept
+    {   return generic_image_view<PixelType>(b_.data(), 0, row, w_, 1, w_);
     }
-    /// @brief Get the pixel at the specified index.
-    /// @param idx The index of the pixel to return.
-    /// @return Const reference to the pixel at the specified index.
-    const_reference operator[] (size_type idx) const noexcept
-    {   return b_[idx];
+    /// @brief Get a view of the pixel row at the specified index, allowing
+    /// `image[row][col]` access to a single pixel.
+    /// @param row The index of the row to return.
+    /// @return A const view of the pixel row at the specified index.
+    generic_image_view<const PixelType> operator[] (size_type row) const noexcept
+    {   return generic_image_view<const PixelType>(b_.data(), 0, row, w_, 1, w_);
     }
     /// @brief Returns the pixel at the specified position from the top left
     /// corner of the image.
@@ -128,24 +130,22 @@ struct generic_image
     {   return b_[y * w_ + x];
     }
     /// @brief Get the pixel at the specified index with bounds checking.
-    /// @param x The x-coordinate of the pixel to return.
-    /// @param y The y-coordinate of the pixel to return.
-    /// @return Const reference to the pixel at the specified position.
-    /// @throws std::out_of_range if `x >= width() || y >= height()`.
-    reference at(size_type x, size_type y)
-    {   if (x >= w_ || y >= h_)
+    /// @param idx The index of the pixel to return.
+    /// @return Reference to the pixel at the specified index.
+    /// @throws std::out_of_range if `idx >= size()`.
+    reference at(size_type idx)
+    {   if (idx >= b_.size())
             throw std::out_of_range("generic_image::at: index out of range");
-        return b_[y * w_ + x];
+        return b_[idx];
     }
     /// @brief Get the pixel at the specified index with bounds checking.
-    /// @param x The x-coordinate of the pixel to return.
-    /// @param y The y-coordinate of the pixel to return.
-    /// @return Const reference to the pixel at the specified position.
-    /// @throws std::out_of_range if `x >= width() || y >= height()`.
-    const_reference at(size_type x, size_type y) const
-    {   if (x >= w_ || y >= h_)
+    /// @param idx The index of the pixel to return.
+    /// @return Const reference to the pixel at the specified index.
+    /// @throws std::out_of_range if `idx >= size()`.
+    const_reference at(size_type idx) const
+    {   if (idx >= b_.size())
             throw std::out_of_range("generic_image::at: index out of range");
-        return b_[y * w_ + x];
+        return b_[idx];
     }
     /// @brief Get a pointer to the underlying data.
     /// @return A pointer to the underlying data.
