@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Armin Sobhani
 //
 #include <pxl/image.hpp>
+#include <pxl/image_view.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,6 +11,7 @@
 
 using color_type = pxl::color<uint8_t, 3>;
 using image_type = pxl::image<uint8_t, 3>;
+using view_type = pxl::image_view<uint8_t, 3>;
 
 // -- ctors --------------------------------------------------------------------
 
@@ -33,6 +35,47 @@ TEST_CASE
     REQUIRE(img.height() == 2);
     for (auto& p : img)
         REQUIRE(p == fill_color);
+}
+TEST_CASE
+(   "image view constructor copies the pixels covered by a full-image view"
+,   "[image][ctors]"
+)
+{   image_type src(3, 2, color_type{1, 2, 3});
+    view_type view(src.data(), 0, 0, src.width(), src.height(), src.width());
+
+    image_type img(view);
+    REQUIRE(img.width() == 3);
+    REQUIRE(img.height() == 2);
+    for (auto& p : img)
+        REQUIRE(p == color_type({1, 2, 3}));
+
+    // the new image is independent from the source
+    src[0] = color_type{9, 9, 9};
+    REQUIRE(img[0] == color_type({1, 2, 3}));
+}
+TEST_CASE
+(   "image view constructor copies only the pixels covered by a sub-region view"
+,   "[image][ctors]"
+)
+{   image_type src(4, 3);
+    for (image_type::size_type y = 0; y < src.height(); ++y)
+        for (image_type::size_type x = 0; x < src.width(); ++x)
+            src(x, y) = color_type
+            {   static_cast<uint8_t>(x)
+            ,   static_cast<uint8_t>(y)
+            ,   0
+            };
+
+    // 2x2 sub-view starting at (1, 1)
+    view_type view(src.data(), 1, 1, 2, 2, src.width());
+    image_type img(view);
+
+    REQUIRE(img.width() == 2);
+    REQUIRE(img.height() == 2);
+    REQUIRE(img(0, 0) == color_type({1, 1, 0}));
+    REQUIRE(img(1, 0) == color_type({2, 1, 0}));
+    REQUIRE(img(0, 1) == color_type({1, 2, 0}));
+    REQUIRE(img(1, 1) == color_type({2, 2, 0}));
 }
 TEST_CASE
 (   "image copy constructor duplicates the pixels"
