@@ -60,7 +60,7 @@ TEST_CASE
 {   image_type src(4, 3);
     for (image_type::size_type y = 0; y < src.height(); ++y)
         for (image_type::size_type x = 0; x < src.width(); ++x)
-            src(x, y) = color_type
+            src[y][x] = color_type
             {   static_cast<uint8_t>(x)
             ,   static_cast<uint8_t>(y)
             ,   0
@@ -72,10 +72,10 @@ TEST_CASE
 
     REQUIRE(img.width() == 2);
     REQUIRE(img.height() == 2);
-    REQUIRE(img(0, 0) == color_type({1, 1, 0}));
-    REQUIRE(img(1, 0) == color_type({2, 1, 0}));
-    REQUIRE(img(0, 1) == color_type({1, 2, 0}));
-    REQUIRE(img(1, 1) == color_type({2, 2, 0}));
+    REQUIRE(img[0][0] == color_type({1, 1, 0}));
+    REQUIRE(img[0][1] == color_type({2, 1, 0}));
+    REQUIRE(img[1][0] == color_type({1, 2, 0}));
+    REQUIRE(img[1][1] == color_type({2, 2, 0}));
 }
 TEST_CASE
 (   "image copy constructor duplicates the pixels"
@@ -148,7 +148,7 @@ TEST_CASE
 {   image_type img(3, 2);
     for (image_type::size_type y = 0; y < img.height(); ++y)
         for (image_type::size_type x = 0; x < img.width(); ++x)
-            img(x, y) = color_type
+            img[y][x] = color_type
             {   static_cast<uint8_t>(x)
             ,   static_cast<uint8_t>(y)
             ,   0
@@ -172,25 +172,58 @@ TEST_CASE
     REQUIRE(img[0][1] == color_type({1, 2, 3}));
 }
 TEST_CASE
-(   "image::operator() provides unchecked (x, y) access"
+(   "image::operator() returns a view of the specified sub-region"
 ,   "[image][element_access]"
 )
-{   image_type img(3, 2);
+{   image_type img(4, 3);
     for (image_type::size_type y = 0; y < img.height(); ++y)
         for (image_type::size_type x = 0; x < img.width(); ++x)
-            img(x, y) = color_type
+            img[y][x] = color_type
             {   static_cast<uint8_t>(x)
             ,   static_cast<uint8_t>(y)
             ,   0
             };
 
-    REQUIRE(img(2, 1) == color_type({2, 1, 0}));
+    auto sub = img(1, 1, 2, 2);
+    REQUIRE(sub.width() == 2);
+    REQUIRE(sub.height() == 2);
+    REQUIRE(sub(0, 0) == color_type({1, 1, 0}));
+    REQUIRE(sub(1, 0) == color_type({2, 1, 0}));
+    REQUIRE(sub(0, 1) == color_type({1, 2, 0}));
+    REQUIRE(sub(1, 1) == color_type({2, 2, 0}));
 
-    img(0, 0) = color_type{42, 42, 42};
-    REQUIRE(img(0, 0) == color_type({42, 42, 42}));
+    // the view is a zero-copy window into the original image
+    sub(0, 0) = color_type{9, 9, 9};
+    REQUIRE(img[1][1] == color_type({9, 9, 9}));
 
-    const image_type cimg = img;
-    REQUIRE(cimg(2, 1) == color_type({2, 1, 0}));
+    const image_type& cimg = img;
+    auto csub = cimg(1, 1, 2, 2);
+    REQUIRE(csub(0, 0) == color_type({9, 9, 9}));
+}
+TEST_CASE
+(   "image::operator() defaults width/height to the rest of the image"
+,   "[image][element_access]"
+)
+{   image_type img(4, 3);
+    for (image_type::size_type y = 0; y < img.height(); ++y)
+        for (image_type::size_type x = 0; x < img.width(); ++x)
+            img[y][x] = color_type
+            {   static_cast<uint8_t>(x)
+            ,   static_cast<uint8_t>(y)
+            ,   0
+            };
+
+    auto sub = img(1, 1);
+    REQUIRE(sub.width() == 3);  // 4 - 1
+    REQUIRE(sub.height() == 2); // 3 - 1
+    REQUIRE(sub(0, 0) == color_type({1, 1, 0}));
+    REQUIRE(sub(2, 1) == color_type({3, 2, 0}));
+
+    const image_type& cimg = img;
+    auto csub = cimg(2, 0);
+    REQUIRE(csub.width() == 2);
+    REQUIRE(csub.height() == 3);
+    REQUIRE(csub(0, 0) == color_type({2, 0, 0}));
 }
 TEST_CASE
 (   "image::at provides bounds-checked linear access"
