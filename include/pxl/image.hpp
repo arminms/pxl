@@ -29,6 +29,10 @@ struct generic_image
     using reverse_iterator = typename Container::reverse_iterator;
     using const_reverse_iterator = typename Container::const_reverse_iterator;
 
+    /// @brief Sentinel used by `operator()` to mean "the rest of the image"
+    /// for a `width`/`height` argument that was not provided.
+    static constexpr size_type npos = static_cast<size_type>(-1);
+
 // -- ctors --------------------------------------------------------------------
     ///
     /// @brief constructor
@@ -113,21 +117,53 @@ struct generic_image
     generic_image_view<const PixelType> operator[] (size_type row) const noexcept
     {   return generic_image_view<const PixelType>(b_.data(), 0, row, w_, 1, w_);
     }
-    /// @brief Returns the pixel at the specified position from the top left
-    /// corner of the image.
-    /// @param x Column index from the top left corner of the image.
-    /// @param y row index from the top left corner of the image.
-    /// @return The pixel at the specified position in the image.
-    reference operator() (size_type x, size_type y) noexcept
-    {   return b_[y * w_ + x];
+    /// @brief Returns a view of the specified sub-region ("sub-image") of
+    /// the image.
+    /// @param x Column offset of the sub-region's top-left corner.
+    /// @param y Row offset of the sub-region's top-left corner.
+    /// @param width Width of the sub-region in pixels; defaults to the
+    ///     remaining width from `x` to the right edge of the image.
+    /// @param height Height of the sub-region in pixels; defaults to the
+    ///     remaining height from `y` to the bottom edge of the image.
+    /// @return A view of the specified sub-region of the image.
+    generic_image_view<PixelType> operator()
+    (   size_type x
+    ,   size_type y
+    ,   size_type width = npos
+    ,   size_type height = npos
+    )   noexcept
+    {   return generic_image_view<PixelType>
+        (   b_.data()
+        ,   x
+        ,   y
+        ,   width == npos ? w_ - x : width
+        ,   height == npos ? h_ - y : height
+        ,   w_
+        );
     }
-    /// @brief Returns the pixel at the specified position from the top left
-    /// corner of the image.
-    /// @param x Column index from the top left corner of the image.
-    /// @param y row index from the top left corner of the image.
-    /// @return Const reference to the pixel at the specified position.
-    const_reference operator() (size_type x, size_type y) const noexcept
-    {   return b_[y * w_ + x];
+    /// @brief Returns a view of the specified sub-region ("sub-image") of
+    /// the image.
+    /// @param x Column offset of the sub-region's top-left corner.
+    /// @param y Row offset of the sub-region's top-left corner.
+    /// @param width Width of the sub-region in pixels; defaults to the
+    ///     remaining width from `x` to the right edge of the image.
+    /// @param height Height of the sub-region in pixels; defaults to the
+    ///     remaining height from `y` to the bottom edge of the image.
+    /// @return A const view of the specified sub-region of the image.
+    generic_image_view<const PixelType> operator()
+    (   size_type x
+    ,   size_type y
+    ,   size_type width = npos
+    ,   size_type height = npos
+    )   const noexcept
+    {   return generic_image_view<const PixelType>
+        (   b_.data()
+        ,   x
+        ,   y
+        ,   width == npos ? w_ - x : width
+        ,   height == npos ? h_ - y : height
+        ,   w_
+        );
     }
     /// @brief Get the pixel at the specified index with bounds checking.
     /// @param idx The index of the pixel to return.
