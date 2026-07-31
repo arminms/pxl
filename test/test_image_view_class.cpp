@@ -71,7 +71,7 @@ TEST_CASE
 {   image_type img(4, 3);
     for (image_type::size_type y = 0; y < img.height(); ++y)
         for (image_type::size_type x = 0; x < img.width(); ++x)
-            img(x, y) = color_type
+            img[y][x] = color_type
             {   static_cast<uint8_t>(x)
             ,   static_cast<uint8_t>(y)
             ,   0
@@ -99,17 +99,17 @@ TEST_CASE
     view_type v(img.data(), 1, 1, 2, 2, img.width());
 
     v(0, 0) = color_type{9, 9, 9};
-    REQUIRE(img(1, 1) == color_type({9, 9, 9}));
+    REQUIRE(img[1][1] == color_type({9, 9, 9}));
 
     for (auto& p : v)
         p = color_type{5, 5, 5};
-    REQUIRE(img(1, 1) == color_type({5, 5, 5}));
-    REQUIRE(img(2, 1) == color_type({5, 5, 5}));
-    REQUIRE(img(1, 2) == color_type({5, 5, 5}));
-    REQUIRE(img(2, 2) == color_type({5, 5, 5}));
+    REQUIRE(img[1][1] == color_type({5, 5, 5}));
+    REQUIRE(img[1][2] == color_type({5, 5, 5}));
+    REQUIRE(img[2][1] == color_type({5, 5, 5}));
+    REQUIRE(img[2][2] == color_type({5, 5, 5}));
     // pixels outside the view are untouched
-    REQUIRE(img(0, 0) == color_type({0, 0, 0}));
-    REQUIRE(img(0, 1) == color_type({0, 0, 0}));
+    REQUIRE(img[0][0] == color_type({0, 0, 0}));
+    REQUIRE(img[1][0] == color_type({0, 0, 0}));
 }
 
 // -- element access -------------------------------------------------------------
@@ -121,7 +121,7 @@ TEST_CASE
 {   image_type img(4, 3);
     for (image_type::size_type y = 0; y < img.height(); ++y)
         for (image_type::size_type x = 0; x < img.width(); ++x)
-            img(x, y) = color_type
+            img[y][x] = color_type
             {   static_cast<uint8_t>(x)
             ,   static_cast<uint8_t>(y)
             ,   0
@@ -145,7 +145,7 @@ TEST_CASE
 
     REQUIRE(v.at(1, 1) == color_type({1, 2, 3}));
     v.at(0, 0) = color_type{9, 9, 9};
-    REQUIRE(img(1, 1) == color_type({9, 9, 9}));
+    REQUIRE(img[1][1] == color_type({9, 9, 9}));
 
     REQUIRE_THROWS_AS(v.at(2, 0), std::out_of_range);
     REQUIRE_THROWS_AS(v.at(0, 2), std::out_of_range);
@@ -160,10 +160,10 @@ TEST_CASE
 )
 {   image_type img(4, 4, color_type{1, 2, 3});
     view_type v(img.data(), 1, 1, 2, 2, img.width());
-    REQUIRE(v.data() == &img(1, 1));
+    REQUIRE(v.data() == &img[1][1]);
 
     const view_type cv = v;
-    REQUIRE(cv.data() == &img(1, 1));
+    REQUIRE(cv.data() == &img[1][1]);
 }
 
 // -- iterators --------------------------------------------------------------
@@ -185,10 +185,10 @@ TEST_CASE
         ,   static_cast<uint8_t>(value)
         };
 
-    REQUIRE(img(1, 0) == color_type({0, 0, 0}));
-    REQUIRE(img(2, 0) == color_type({1, 1, 1}));
-    REQUIRE(img(1, 1) == color_type({2, 2, 2}));
-    REQUIRE(img(2, 1) == color_type({3, 3, 3}));
+    REQUIRE(img[0][1] == color_type({0, 0, 0}));
+    REQUIRE(img[0][2] == color_type({1, 1, 1}));
+    REQUIRE(img[1][1] == color_type({2, 2, 2}));
+    REQUIRE(img[1][2] == color_type({3, 3, 3}));
 }
 TEST_CASE
 (   "image_view iterator supports random access arithmetic"
@@ -197,7 +197,7 @@ TEST_CASE
 {   image_type img(4, 4);
     for (image_type::size_type y = 0; y < img.height(); ++y)
         for (image_type::size_type x = 0; x < img.width(); ++x)
-            img(x, y) = color_type
+            img[y][x] = color_type
             {   static_cast<uint8_t>(x)
             ,   static_cast<uint8_t>(y)
             ,   0
