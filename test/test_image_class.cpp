@@ -50,8 +50,8 @@ TEST_CASE
         REQUIRE(p == color_type({1, 2, 3}));
 
     // the new image is independent from the source
-    src[0] = color_type{9, 9, 9};
-    REQUIRE(img[0] == color_type({1, 2, 3}));
+    src.at(0) = color_type{9, 9, 9};
+    REQUIRE(img.at(0) == color_type({1, 2, 3}));
 }
 TEST_CASE
 (   "image view constructor copies only the pixels covered by a sub-region view"
@@ -86,12 +86,12 @@ TEST_CASE
 
     REQUIRE(b.width() == a.width());
     REQUIRE(b.height() == a.height());
-    for (color_type::size_type i = 0; i < b.size(); ++i)
-        REQUIRE(b[i] == a[i]);
+    for (image_type::size_type i = 0; i < b.size(); ++i)
+        REQUIRE(b.at(i) == a.at(i));
 
     // the copy is independent from the original
-    a[0] = color_type{9, 9, 9};
-    REQUIRE(b[0] == color_type({1, 2, 3}));
+    a.at(0) = color_type{9, 9, 9};
+    REQUIRE(b.at(0) == color_type({1, 2, 3}));
 }
 TEST_CASE
 (   "image move constructor transfers the pixels"
@@ -122,8 +122,8 @@ TEST_CASE
         REQUIRE(p == color_type({1, 2, 3}));
 
     // the copy is independent from the original
-    a[0] = color_type{7, 7, 7};
-    REQUIRE(b[0] == color_type({1, 2, 3}));
+    a.at(0) = color_type{7, 7, 7};
+    REQUIRE(b.at(0) == color_type({1, 2, 3}));
 }
 TEST_CASE
 (   "image move assignment operator transfers the pixels"
@@ -142,17 +142,34 @@ TEST_CASE
 // -- element access -------------------------------------------------------------
 
 TEST_CASE
-(   "image::operator[] provides unchecked linear access"
+(   "image::operator[] returns a view of the specified row"
+,   "[image][element_access]"
+)
+{   image_type img(3, 2);
+    for (image_type::size_type y = 0; y < img.height(); ++y)
+        for (image_type::size_type x = 0; x < img.width(); ++x)
+            img(x, y) = color_type
+            {   static_cast<uint8_t>(x)
+            ,   static_cast<uint8_t>(y)
+            ,   0
+            };
+
+    REQUIRE(img[0].width() == 3);
+    REQUIRE(img[0].height() == 1);
+    REQUIRE(img[1][2] == color_type({2, 1, 0}));
+
+    const image_type cimg = img;
+    REQUIRE(cimg[1][2] == color_type({2, 1, 0}));
+}
+TEST_CASE
+(   "image::operator[][] allows writing through the row view"
 ,   "[image][element_access]"
 )
 {   image_type img(2, 2, color_type{1, 2, 3});
-    REQUIRE(img[0] == color_type({1, 2, 3}));
 
-    img[0] = color_type{9, 9, 9};
-    REQUIRE(img[0] == color_type({9, 9, 9}));
-
-    const image_type cimg(2, 2, color_type{1, 2, 3});
-    REQUIRE(cimg[3] == color_type({1, 2, 3}));
+    img[0][0] = color_type{9, 9, 9};
+    REQUIRE(img.at(0) == color_type({9, 9, 9}));
+    REQUIRE(img[0][1] == color_type({1, 2, 3}));
 }
 TEST_CASE
 (   "image::operator() provides unchecked (x, y) access"
@@ -170,41 +187,39 @@ TEST_CASE
     REQUIRE(img(2, 1) == color_type({2, 1, 0}));
 
     img(0, 0) = color_type{42, 42, 42};
-    REQUIRE(img[0] == color_type({42, 42, 42}));
+    REQUIRE(img(0, 0) == color_type({42, 42, 42}));
 
     const image_type cimg = img;
     REQUIRE(cimg(2, 1) == color_type({2, 1, 0}));
 }
 TEST_CASE
-(   "image::at provides bounds-checked (x, y) access"
+(   "image::at provides bounds-checked linear access"
 ,   "[image][element_access]"
 )
 {   image_type img(2, 2, color_type{1, 2, 3});
 
-    REQUIRE(img.at(1, 1) == color_type({1, 2, 3}));
-    img.at(0, 0) = color_type{9, 9, 9};
-    REQUIRE(img[0] == color_type({9, 9, 9}));
+    REQUIRE(img.at(3) == color_type({1, 2, 3}));
+    img.at(0) = color_type{9, 9, 9};
+    REQUIRE(img.at(0) == color_type({9, 9, 9}));
 
-    REQUIRE_THROWS_AS(img.at(2, 0), std::out_of_range);
-    REQUIRE_THROWS_AS(img.at(0, 2), std::out_of_range);
+    REQUIRE_THROWS_AS(img.at(4), std::out_of_range);
 
     const image_type cimg(2, 2, color_type{1, 2, 3});
-    REQUIRE(cimg.at(1, 1) == color_type({1, 2, 3}));
-    REQUIRE_THROWS_AS(cimg.at(2, 0), std::out_of_range);
-    REQUIRE_THROWS_AS(cimg.at(0, 2), std::out_of_range);
+    REQUIRE(cimg.at(3) == color_type({1, 2, 3}));
+    REQUIRE_THROWS_AS(cimg.at(4), std::out_of_range);
 }
 TEST_CASE
 (   "image::data provides direct access to the underlying storage"
 ,   "[image][element_access]"
 )
 {   image_type img(2, 2, color_type{1, 2, 3});
-    REQUIRE(img.data() == &img[0]);
+    REQUIRE(img.data() == &img.at(0));
 
     img.data()[1] = color_type{9, 9, 9};
-    REQUIRE(img[1] == color_type({9, 9, 9}));
+    REQUIRE(img.at(1) == color_type({9, 9, 9}));
 
     const image_type cimg(2, 2, color_type{1, 2, 3});
-    REQUIRE(cimg.data() == &cimg[0]);
+    REQUIRE(cimg.data() == &cimg.at(0));
 }
 
 // -- iterators --------------------------------------------------------------
@@ -223,8 +238,8 @@ TEST_CASE
         };
 
     REQUIRE(std::distance(img.begin(), img.end()) == 4);
-    REQUIRE(img[0] == color_type({0, 0, 0}));
-    REQUIRE(img[3] == color_type({3, 3, 3}));
+    REQUIRE(img.at(0) == color_type({0, 0, 0}));
+    REQUIRE(img.at(3) == color_type({3, 3, 3}));
 }
 TEST_CASE
 (   "image::cbegin/cend provide const iteration"
@@ -271,7 +286,7 @@ TEST_CASE
     ));
 
     *img.rbegin() = color_type{9, 9, 9};
-    REQUIRE(img[3] == color_type({9, 9, 9}));
+    REQUIRE(img.at(3) == color_type({9, 9, 9}));
 }
 TEST_CASE
 (   "image::crbegin/crend provide const reverse iteration"
