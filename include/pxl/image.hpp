@@ -7,6 +7,7 @@
 
 #include <pxl/concepts.hpp>
 #include <pxl/color.hpp>
+#include <pxl/image_view.hpp>
 #include <pxl/memory.hpp>
 
 namespace pxl {
@@ -55,6 +56,13 @@ struct generic_image
     ,   h_(height)
     {   std::fill(begin(), end(), color);
     }
+    /// @brief view constructor
+    /// @param view image view to copy the pixels from
+    generic_image(const generic_image_view<PixelType>& view)
+    :   b_(std::begin(view), std::end(view))
+    ,   w_(view.width())
+    ,   h_(view.height())
+    {}
     /// @brief copy constructor
     /// @param other image to copy from
     generic_image(const generic_image& other)
