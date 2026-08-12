@@ -32,5 +32,5 @@ ctest --test-dir build --output-on-failure   # run unit tests
 ## Tests
 
 - Framework: Catch2 v3, one `test_<name>.cpp` file per component under [test/](test/).
-- Register new test files by adding a call to the `add_unit_tests(<name> <source>.cpp)` function followed by `catch_discover_tests(<target> TEST_PREFIX "[Core] ")` in [test/CMakeLists.txt](test/CMakeLists.txt) — this handles CUDA/HIP source-language switching automatically.
+- Register new test files by adding a call to the `add_unit_tests(<name> <source>.cpp)` function followed by `catch_discover_tests(<target> TEST_PREFIX "[Core] ")` in [test/CMakeLists.txt](test/CMakeLists.txt) — this handles CUDA/HIP source-language switching automatically.
 - `TEST_CASE` names are full descriptive sentences; tags are lowercase and hierarchical, e.g. `"[color][ctors]"`, `"[color][element_access]"` — group related cases under `// -- section --` comment banners as in [test_color_class.cpp](test/test_color_class.cpp).
