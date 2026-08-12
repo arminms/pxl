@@ -4,6 +4,8 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
+#include <stdexcept>
 #include <utility>
 
 namespace pxl::detail {
@@ -140,57 +142,55 @@ struct uint32_to_array<8, T> // 64-bits per channels
     }
 };
 
-constexpr uint8_t hexchar_to_int(char ch)
-{   if (ch >= '0' && ch <= '9') return ch - '0';
-    if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
-    if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
-    return 0;
+constexpr uint8_t hex_digit_to_int(char c)
+{   if (c >= '0' && c <= '9') return static_cast<uint8_t>(c - '0');
+    if (c >= 'a' && c <= 'f') return static_cast<uint8_t>(c - 'a' + 10);
+    if (c >= 'A' && c <= 'F') return static_cast<uint8_t>(c - 'A' + 10);
+    throw std::invalid_argument("Invalid hex character");
 }
 
-}   // end pxl::detail namespace
+constexpr uint32_t operator""_rgba(const char* str, std::size_t len)
+{   // Valid lengths with '#': 7 for #RRGGBB, 9 for #RRGGBBAA
+    if (str[0] != '#' || (len != 7 && len != 9))
+        throw std::invalid_argument("RGBA literal must be in '#RRGGBB' or '#RRGGBBAA' format");
+
+    uint32_t r = (hex_digit_to_int(str[1]) << 4) | hex_digit_to_int(str[2]);
+    uint32_t g = (hex_digit_to_int(str[3]) << 4) | hex_digit_to_int(str[4]);
+    uint32_t b = (hex_digit_to_int(str[5]) << 4) | hex_digit_to_int(str[6]);
+    
+    // Parse alpha if present; default to fully opaque (0xFF)
+    uint32_t a
+    =   (len == 9) 
+    ?   ((hex_digit_to_int(str[7]) << 4) | hex_digit_to_int(str[8]))
+    :   0xFF;
+
+    return (r << 24) | (g << 16) | (b << 8) | a;
+}
+
+} // end pxl::detail namespace
 
 // -- string literal operator --------------------------------------------------
 
-template<char... Digits>
-struct hexcolor_to_uint32;
+namespace pxl::literals {
 
-template<char D, char... Digits>
-struct hexcolor_to_uint32<D, Digits...>
-{   static_assert
-    (   (D >= '0' && D <= '9')
-    ||  (D >= 'A' && D <= 'F')
-    ||  (D >= 'a' && D <= 'f')
-    ||   D == 'x'
-    ||   D == 'X'
-    ,   "Wrong hex RGBA value!"
-    );
-    static uint32_t const value
-    =   pxl::detail::hexchar_to_int(D)
-    *   (1ULL << 4 * sizeof...(Digits))
-    +   hexcolor_to_uint32<Digits...>::value;
+template <std::size_t N>
+struct FixedString
+{   char buf[N]{};
+    constexpr FixedString(const char (&s)[N]) {
+        for (std::size_t i = 0; i < N; ++i) buf[i] = s[i];
+    }
 };
 
-template<char D>
-struct hexcolor_to_uint32<D>
-{   static_assert
-    (   (D >= '0' && D <= '9')
-    ||  (D >= 'A' && D <= 'F')
-    ||  (D >= 'a' && D <= 'f')
-    ||   D == 'x'
-    ||   D == 'X'
-    ,   "Wrong hex RGBA value!"
+template <FixedString FS>
+constexpr uint32_t operator""_rgba()
+{   // Exact length check: '#' + 6 hex digits + null terminator -> size 9
+    static_assert
+    (   sizeof(FS.buf) >= 8
+    &&  sizeof(FS.buf) <= 10
+    ,   "RGB literal must be in '#RRGGBB' or '#RRGGBBAA' format"
     );
-    static uint32_t const value = pxl::detail::hexchar_to_int(D);
-};
-
-template<char... Digits>
-constexpr uint32_t operator"" _rgb()
-{   static_assert(8 == sizeof...(Digits), "Hex RGB must have 6 digits!");
-    return hexcolor_to_uint32<Digits...>::value << 8 | 0xFF;
+    static_assert(FS.buf[0] == '#', "RGB literal must start with '#'");
+    return pxl::detail::operator""_rgba(FS.buf, sizeof(FS.buf) - 1);
 }
 
-template<char... Digits>
-constexpr uint32_t operator"" _rgba()
-{   static_assert(10 == sizeof...(Digits), "Hex RGBA must have 8 digits!");
-    return hexcolor_to_uint32<Digits...>::value;
-}
+} // end pxl::literals namespace
