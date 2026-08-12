@@ -8,6 +8,7 @@
 
 #include <algorithm>
 
+using namespace pxl::literals;
 using pxl::generic_color;
 
 // -- ctors ------------------------------------------------------------------
@@ -337,12 +338,12 @@ TEST_CASE
 (   "uint32_t converting ctor 8-bits per channel"
 ,   "[color][ctor][uint8_t]"
 )
-{   pxl::generic_color<uint8_t> c(0x1a2b3c4d);
+{   pxl::generic_color<uint8_t> c(0x1a2b3cff);
     CHECK(0x1a == c[0]);
     CHECK(0x2b == c[1]);
     CHECK(0x3c == c[2]);
-    CHECK(0x4d == c[3]);
-    CHECK(c == 0x1a2b3c4d_rgba);
+    CHECK(0xff == c[3]);
+    CHECK(c == "#1a2b3c"_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor 16-bits per channel"
@@ -353,7 +354,7 @@ TEST_CASE
     CHECK(0x2b * 0xFF == c[1]);
     CHECK(0x3c * 0xFF == c[2]);
     CHECK(0x4d * 0xFF == c[3]);
-    CHECK(c == 0x1a2b3c4d_rgba);
+    CHECK(c == "#1a2b3c4d"_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor 32-bits per channel"
@@ -364,7 +365,7 @@ TEST_CASE
     CHECK(0x2b * 0xFFFF == c[1]);
     CHECK(0x3c * 0xFFFF == c[2]);
     CHECK(0x4d * 0xFFFF == c[3]);
-    CHECK(c == 0x1a2b3c4d_rgba);
+    CHECK(c == "#1a2b3c4d"_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor 64-bits per channel"
@@ -375,7 +376,7 @@ TEST_CASE
     CHECK(0x2b * 0xFFFFFF == c[1]);
     CHECK(0x3c * 0xFFFFFF == c[2]);
     CHECK(0x4d * 0xFFFFFF == c[3]);
-    CHECK(c == 0x1a2b3c4d_rgba);
+    CHECK(c == "#1a2b3c4d"_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor float per channel"
@@ -386,7 +387,7 @@ TEST_CASE
     REQUIRE_THAT(c[1], Catch::Matchers::WithinRel(0.168627, 0.0001));
     REQUIRE_THAT(c[2], Catch::Matchers::WithinRel(0.235294, 0.0001));
     REQUIRE_THAT(c[3], Catch::Matchers::WithinRel(0.301961, 0.0001));
-    CHECK(c == 0x1a2b3c4d_rgba);
+    CHECK(c == "#1a2b3c4d"_rgba);
 }
 TEST_CASE
 (   "uint32_t converting ctor double per channel"
@@ -397,5 +398,5 @@ TEST_CASE
     REQUIRE_THAT(c[1], Catch::Matchers::WithinRel(0.168627, 0.0001));
     REQUIRE_THAT(c[2], Catch::Matchers::WithinRel(0.235294, 0.0001));
     REQUIRE_THAT(c[3], Catch::Matchers::WithinRel(0.301961, 0.0001));
-    CHECK(c == 0x1a2b3c4d_rgba);
+    CHECK(c == "#1a2b3c4d"_rgba);
 }
