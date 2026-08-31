@@ -5,6 +5,10 @@
 
 #include <pxl/algorithm/detail/convert.hpp>
 
+#include <algorithm>
+#include <iterator>
+#include <type_traits>
+
 namespace pxl {
 
 template
@@ -23,14 +27,22 @@ inline void convert
     if constexpr (std::is_same_v<in_type, out_type>)
         std::copy(first, last, out);
     else
+    {   if (first == last)
+            return;
+        auto const count
+        =   std::distance(first, last)
+        *   static_cast<typename std::iterator_traits<InputIt>::difference_type>
+            (   in_type::max_size()
+            );
         detail::convert_impl
-        (   first
-        ,   last
-        ,   out
+        (   first->data()
+        ,   first->data() + count
+        ,   out->data()
         ,   gamma
         ,   std::is_floating_point<typename in_type::channel_type>()
         ,   std::is_floating_point<typename out_type::channel_type>()
         );
+    }
 }
 
 template
