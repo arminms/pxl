@@ -32,9 +32,11 @@ endfunction()
 add_unit_tests("color_class" test_color_class.cpp)
 add_unit_tests("image_class" test_image_class.cpp)
 add_unit_tests("image_view_class" test_image_view_class.cpp)
+add_unit_tests("algorithm_convert" test_algorithm_convert.cpp)
 
 ## finally adding unit tests
 #
-catch_discover_tests(test_color_class TEST_PREFIX "[Core] ")
-catch_discover_tests(test_image_class TEST_PREFIX "[Core] ")
-catch_discover_tests(test_image_view_class TEST_PREFIX "[Core] ")
+catch_discover_tests(test_color_class TEST_PREFIX "[Core] ")
+catch_discover_tests(test_image_class TEST_PREFIX "[Core] ")
+catch_discover_tests(test_image_view_class TEST_PREFIX "[Core] ")
+catch_discover_tests(test_algorithm_convert TEST_PREFIX "[Algorithm] ")
