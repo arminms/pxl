@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <numeric>
 
 using color_type = pxl::color<uint8_t, 3>;
@@ -23,6 +24,52 @@ TEST_CASE
     REQUIRE(img.width() == 4);
     REQUIRE(img.height() == 3);
     REQUIRE(img.size() == 12);
+}
+TEST_CASE
+(   "image reader constructor forwards the filename to the reader and adopts its result"
+,   "[image][ctors]"
+)
+{   struct mock_reader
+    {   image_type operator() (std::string_view filename)
+        {   REQUIRE(filename == "some/path.png");
+            return image_type(3, 2, color_type{4, 5, 6});
+        }
+    };
+
+    image_type img("some/path.png", mock_reader{});
+
+    REQUIRE(img.width() == 3);
+    REQUIRE(img.height() == 2);
+    for (auto& p : img)
+        REQUIRE(p == color_type{4, 5, 6});
+}
+TEST_CASE
+(   "image constructor reads pixels from a file using the default stb reader"
+,   "[image][ctors]"
+)
+{   auto path = std::filesystem::temp_directory_path() / "pxl_test_reader_ctor.png";
+    std::vector<uint8_t> pixels
+    {   255,   0,   0,     0, 255,   0
+    ,     0,   0, 255,   255, 255,   0
+    };
+    REQUIRE
+    (   stbi_write_png
+        (   path.string().c_str()
+        ,   2, 2, 3
+        ,   pixels.data()
+        ,   2 * 3
+        )   != 0
+    );
+
+    image_type img(path.string());
+    std::filesystem::remove(path);
+
+    REQUIRE(img.width() == 2);
+    REQUIRE(img.height() == 2);
+    REQUIRE(img[0][0] == color_type{255, 0, 0});
+    REQUIRE(img[0][1] == color_type{0, 255, 0});
+    REQUIRE(img[1][0] == color_type{0, 0, 255});
+    REQUIRE(img[1][1] == color_type{255, 255, 0});
 }
 TEST_CASE
 (   "image fill constructor initializes every pixel to the given color"
