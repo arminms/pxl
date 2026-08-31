@@ -50,7 +50,7 @@ template
 ,   std::ranges::random_access_range OutputImage
 ,   std::floating_point T = float
 >
-requires Image<InputImage> && Image<OutputImage>
+// requires Image<InputImage> && Image<OutputImage>
 inline void convert
 (   InputImage const& in
 ,   OutputImage& out
