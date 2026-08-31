@@ -46,7 +46,7 @@ struct stb
             ,   0, 0, w, h, w
             );
             ImageType r(w, h);
-            pxl::convert(v.begin(), v.end(), r.begin(), 2.2f);
+            pxl::convert(v, r);
             stbi_image_free(data);
             return r;
         }
@@ -66,7 +66,7 @@ struct stb
             ,   0, 0, w, h, w
             );
             ImageType r(w, h);
-            pxl::convert(v.begin(), v.end(), r.begin(), 2.2f);
+            pxl::convert(v, r);
             stbi_image_free(data);
             return r;
         }
