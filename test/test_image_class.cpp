@@ -411,3 +411,113 @@ TEST_CASE
     using rgba_image_type = pxl::image<uint8_t, 4>;
     REQUIRE(rgba_image_type::channels() == 4);
 }
+
+// -- exports --------------------------------------------------------------
+
+TEST_CASE
+(   "image::save(filename) forwards the filename and image to the writer"
+,   "[image][exports]"
+)
+{   struct mock_writer
+    {   int operator() (std::string_view filename, const image_type& image)
+        {   REQUIRE(filename == "some/path.png");
+            REQUIRE(image.width() == 3);
+            REQUIRE(image.height() == 2);
+            return 42;
+        }
+    };
+
+    image_type img(3, 2, color_type{4, 5, 6});
+    REQUIRE(img.save("some/path.png", mock_writer{}) == 42);
+}
+TEST_CASE
+(   "image::save(stringstream) forwards the stream and image to the writer"
+,   "[image][exports]"
+)
+{   struct mock_writer
+    {   int operator() (std::stringstream& ss, const image_type& image)
+        {   ss << "wrote " << image.width() << "x" << image.height();
+            return 7;
+        }
+    };
+
+    image_type img(3, 2, color_type{4, 5, 6});
+    std::stringstream ss;
+    REQUIRE(img.save(ss, mock_writer{}) == 7);
+    REQUIRE(ss.str() == "wrote 3x2");
+}
+TEST_CASE
+(   "image::save(filename) writes a PNG that reads back with matching pixels"
+,   "[image][exports]"
+)
+{   auto path = std::filesystem::temp_directory_path() / "pxl_test_save_ctor.png";
+    color_type c00{255, 0, 0}, c01{0, 255, 0}, c10{0, 0, 255}, c11{255, 255, 0};
+    image_type img(2, 2);
+    img[0][0] = c00;
+    img[0][1] = c01;
+    img[1][0] = c10;
+    img[1][1] = c11;
+
+    REQUIRE(img.save(path.string()) != 0);
+
+    int w, h, n;
+    uint8_t* data = stbi_load(path.string().c_str(), &w, &h, &n, 3);
+    std::filesystem::remove(path);
+    REQUIRE(data != nullptr);
+    REQUIRE(w == 2);
+    REQUIRE(h == 2);
+    REQUIRE(std::equal(data, data + 3, c00.data()));
+    REQUIRE(std::equal(data + 3, data + 6, c01.data()));
+    REQUIRE(std::equal(data + 6, data + 9, c10.data()));
+    REQUIRE(std::equal(data + 9, data + 12, c11.data()));
+    stbi_image_free(data);
+}
+TEST_CASE
+(   "image::save(stringstream) writes a PNG that reads back with matching pixels"
+,   "[image][exports]"
+)
+{   color_type c00{255, 0, 0}, c01{0, 255, 0}, c10{0, 0, 255}, c11{255, 255, 0};
+    image_type img(2, 2);
+    img[0][0] = c00;
+    img[0][1] = c01;
+    img[1][0] = c10;
+    img[1][1] = c11;
+
+    std::stringstream ss;
+    REQUIRE(img.save(ss) != 0);
+
+    auto encoded = ss.str();
+    int w, h, n;
+    uint8_t* data = stbi_load_from_memory
+    (   reinterpret_cast<const uint8_t*>(encoded.data())
+    ,   static_cast<int>(encoded.size())
+    ,   &w, &h, &n, 3
+    );
+    REQUIRE(data != nullptr);
+    REQUIRE(w == 2);
+    REQUIRE(h == 2);
+    REQUIRE(std::equal(data, data + 3, c00.data()));
+    REQUIRE(std::equal(data + 3, data + 6, c01.data()));
+    REQUIRE(std::equal(data + 6, data + 9, c10.data()));
+    REQUIRE(std::equal(data + 9, data + 12, c11.data()));
+    stbi_image_free(data);
+}
+TEST_CASE
+(   "image::save picks the writer based on filename extension"
+,   "[image][exports]"
+)
+{   auto path = std::filesystem::temp_directory_path() / "pxl_test_save_ext.bmp";
+    image_type img(2, 2, color_type{10, 20, 30});
+
+    REQUIRE(img.save(path.string()) != 0);
+
+    int w, h, n;
+    uint8_t* data = stbi_load(path.string().c_str(), &w, &h, &n, 3);
+    std::filesystem::remove(path);
+    REQUIRE(data != nullptr);
+    REQUIRE(w == 2);
+    REQUIRE(h == 2);
+    color_type expected{10, 20, 30};
+    REQUIRE(std::equal(data, data + 3, expected.data()));
+    stbi_image_free(data);
+}
