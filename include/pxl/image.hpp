@@ -9,6 +9,7 @@
 #include <pxl/color.hpp>
 #include <pxl/image_view.hpp>
 #include <pxl/memory.hpp>
+#include <pxl/io/stb.hpp>
 
 namespace pxl {
 
@@ -18,6 +19,7 @@ struct generic_image
 {   using value_type = typename Container::value_type;
     using pixel_type = PixelType;
     using channel_type = typename PixelType::channel_type;
+    using container_type = Container;
     using size_type = typename Container::size_type;
     using difference_type = typename Container::difference_type;
     using reference = typename Container::reference;
@@ -45,6 +47,18 @@ struct generic_image
     :   b_(width * height)
     ,   w_(width)
     ,   h_(height)
+    {}
+    /// @brief constructor that reads an image from a file using the specified reader.
+    /// @tparam Reader The type of the reader to use for reading the image.
+    /// @param filename The name of the file to read the image from.
+    /// @param read The reader to use for reading the image. Defaults to `io::in::stb<generic_image>`.
+    template <typename Reader = io::in::stb<generic_image>>
+    requires std::invocable<Reader, std::string_view>
+    generic_image
+    (   std::string_view filename
+    ,   Reader read = Reader()
+    )
+    :   generic_image(read(filename))
     {}
     /// @brief fill constructor
     /// @param width generic_image width in pixel
