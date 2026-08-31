@@ -317,6 +317,27 @@ struct generic_image
     {   return pixel_type::max_size();
     }
 
+// -- exports ------------------------------------------------------------------
+    ///
+    /// @brief Saves the image to a file using the specified writer.
+    /// @tparam Writer The type of the writer to use for saving the image.
+    /// @param filename The name of the file to save the image to.
+    /// @param w The writer to use for saving the image. Defaults to `io::out::stb<generic_image>`.
+    template <typename Writer = io::out::stb<generic_image>>
+    requires std::invocable<Writer, std::string_view, const generic_image&>
+    int save(std::string_view filename, Writer w = Writer()) const
+    {   return w(filename, *this);
+    }
+    /// @brief Saves the image to a stringstream using the specified writer.
+    /// @tparam Writer The type of the writer to use for saving the image.
+    /// @param ss The stringstream to save the image to.
+    /// @param w The writer to use for saving the image. Defaults to `io::out::stb<generic_image>`.
+    template <typename Writer = io::out::stb<generic_image>>
+    requires std::invocable<Writer, std::stringstream&, const generic_image&>
+    int save(std::stringstream& ss, Writer w = Writer()) const
+    {   return w(ss, *this);
+    }
+
 private:
     Container  b_; // buffer
     size_type  w_; // width
