@@ -46,8 +46,8 @@ inline void convert
 }
 
 template
-<   std::ranges::contiguous_range InputImage
-,   std::ranges::contiguous_range OutputImage
+<   std::ranges::random_access_range InputImage
+,   std::ranges::random_access_range OutputImage
 ,   std::floating_point T = float
 >
 requires Image<InputImage> && Image<OutputImage>
