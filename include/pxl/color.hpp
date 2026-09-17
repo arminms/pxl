@@ -10,11 +10,9 @@
 
 namespace pxl {
 
-template <typename T, std::size_t C = 4>
+template <typename T = uint8_t, std::size_t C = 4>
 struct generic_color
-{
-public:
-    using value_type = T;
+{   using value_type = T;
     using channel_type = T;
     using size_type = typename std::array<T,C>::size_type;
     using difference_type = typename std::array<T,C>::difference_type;
