@@ -37,6 +37,13 @@ concept has_pixel_type = requires
 };
 
 template<typename T>
+concept Color
+=   has_channel_type<T>
+&&  has_value_type<T>
+&&  has_size_type<T>
+;
+
+template<typename T>
 concept Pixel
 =   has_channel_type<T>
 &&  has_value_type<T>
