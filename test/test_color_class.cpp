@@ -347,7 +347,7 @@ TEST_CASE
     CHECK(0x3c == c[2]);
     CHECK(0xff == c[3]);
     CHECK(c == "#1a2b3c"_rgba);
-    pxl::generic_color<uint8_t> b("#1a2b3c"_rgba);
+    pxl::color b("#1a2b3c"_rgba);
     CHECK(b == c);
 }
 TEST_CASE
