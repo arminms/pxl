@@ -348,7 +348,7 @@ private:
 /// channels.
 /// @tparam T The type of each channel.
 /// @tparam C The number of channels.
-template <typename T, std::size_t C = 4>
+template <typename T = uint8_t, std::size_t C = 4>
 using image
 =   generic_image<generic_color<T, C>
 ,   std::vector<generic_color<T, C>>>; 
