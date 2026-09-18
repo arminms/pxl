@@ -2,4 +2,4 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # PXL
-`PXL` (pronounced `pik·sl`) is *C++20* header-only image processing library.
+`PXL` (pronounced `pik·sl`) is a header-only image processing library in `C++20`.
