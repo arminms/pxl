@@ -30,32 +30,32 @@ test_image
 +++
 Getting a *non-owning*, *zero-copy* view of the image (like `std::string_view`):
 ```{code-cell} cpp
-test_image(102, 56, 130, 74)
+test_image(104, 57, 127, 71)
 ```
 +++
 A view of the specified row in the image:
 ```{code-cell} cpp
-test_image[56]
+test_image[57]
 ```
 +++
-Pixel at x = 102, y = 56 (notice: x <=> y are swapped)
+Pixel at x = 104, y = 57 (notice: x <=> y are swapped)
 ```{code-cell} cpp
-test_image[56][102]
+test_image[57][104]
 ```
 +++
-Alpha channel at pixel 102, 56:
+Alpha channel at pixel 104, 57:
 ```{code-cell} cpp
-test_image[56][102][3]
+test_image[57][104][3]
 ```
 +++
 Turning the pixel into a widget:
 ```{code-cell} cpp
-auto color_picker = pxl::widget(test_image[56][102]);
+auto color_picker = pxl::widget(test_image[57][104]);
 color_picker.display();
 ```
 +++
 ```{code-cell} cpp
-test_image[56]
+test_image[57]
 ```
 +++
 ```{code-cell} cpp
